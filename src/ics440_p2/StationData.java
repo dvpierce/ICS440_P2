@@ -19,6 +19,7 @@ public class StationData {
     
     public String toString() {
         
-        return this.name + " " + this.id;
+        return String.format("id=%s, latitude=%f, longitude=%f, elevation=%f, state=%s, name=%s", 
+                this.id, this.latitude, this.longitude, this.elevation, this.state, this.name);
     }
 } 
