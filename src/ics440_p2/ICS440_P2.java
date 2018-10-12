@@ -1,13 +1,11 @@
 package ics440_p2;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ICS440_P2 {
 
@@ -16,6 +14,39 @@ public class ICS440_P2 {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
+        // Get start-date, end-date and Max/Min from user:
+        // https://coderanch.com/t/598292/java/date-input-user-java
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate;
+        Date endDate;
+
+        String tempString = "";
+        Scanner reader = new Scanner(System.in);
+        
+        while (true) {
+            try { 
+                System.out.print("Please enter a Start Date in YYYY-MM-DD format: ");
+                tempString = reader.nextLine(); 
+                startDate = df.parse(tempString);
+                System.out.println(startDate.toString());
+                System.out.print("Please enter an End Date in YYYY-MM-DD format: ");
+                tempString = reader.nextLine();
+                endDate = df.parse(tempString);
+                System.out.println(endDate.toString());
+                if ( (startDate.compareTo(endDate)) == 1 ) {
+                    System.out.println("Start Date after End Date. Try again.");
+                    throw new Exception();
+                }
+                break;
+            }
+            catch (Exception e) {
+                System.out.println("Invalid input. Please try again.");
+            }
+        }
+        
+        
+        
         // Create Queue of Files.
         String localFolderPath = "c:\\users\\dave_pierce\\Downloads\\ghcnd_hcn2";
         String localStationFilePath = "c:\\users\\dave_pierce\\Downloads\\ghcnd-stations.txt";
@@ -29,7 +60,7 @@ public class ICS440_P2 {
         // System.out.println("maxThreads = " + Integer.toString(maxThreads));
 
         // Populate Collection of Stations
-        WeatherFileParser.StationLoader(localStationFilePath, stationQueue);
+        WeatherFileParser.StationLoader(localStationFilePath, stationQueue, startDate, endDate);
 
         // Find file names in path.
         // https://stackoverflow.com/questions/5694385/getting-the-filenames-of-all-files-in-a-folder
@@ -40,11 +71,20 @@ public class ICS440_P2 {
             fileNameQueue.add(thisFile);
         }
 
+        
+        
         while ( ! fileNameQueue.isEmpty() )
         {
-            WeatherFileParser.GetMaxFive(weatherQueue, (File) fileNameQueue.remove());
-//             WeatherFileParser.GetMinFive(weatherQueue, fileNameQueue.remove());
+            WeatherFileParser.GetMaxFive(weatherQueue, (File) fileNameQueue.remove(), startDate, endDate);
+            // WeatherFileParser.GetMinFive(weatherQueue, (File) fileNameQueue.remove(), startDate, endDate);
         }
+        
+        while ( ! weatherQueue.isEmpty() )
+        {
+            System.out.println(weatherQueue.remove().toString() );
+        }
+        
+        
         
 //        while(! weatherQueue.isEmpty() )
 //        {

@@ -9,6 +9,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,7 +81,8 @@ public class WeatherFileParser {
 
 
     public static void StationLoader(String localStationFilePath,
-            ConcurrentLinkedQueue stationQueue)
+            ConcurrentLinkedQueue stationQueue,
+            Date startDate, Date endDate)
     {
                 
         File ghcndStations = new File(localStationFilePath);
@@ -95,29 +101,48 @@ public class WeatherFileParser {
         }
     }
 
-    static void GetMaxFive(ConcurrentLinkedQueue weatherQueue, File fileName) {
+    static void GetMaxFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
         // Create a collection for weather data for the specified file and
-        // enqueue that data in the weatherQueue.
+        // enqueue that data
 
         ConcurrentLinkedQueue<WeatherData> allWeatherDataInFile = new ConcurrentLinkedQueue();
         FileParser(allWeatherDataInFile, fileName, "TMAX");
         
         // Go through allWeatherDataInFile and find the maximum five temperatures
-        // by removing the lowest temperature a bunch of times. This is really
-        // inefficient, but it's easy to program.
-        WeatherData localMax = null;
-
-        for ( int i = 0; i < 5; i++ ) {
-            for ( WeatherData thisDay : allWeatherDataInFile )
-            {
-                
-            }
-            
-            
+        MaxMinWeatherDataCollector maxTemps = new MaxMinWeatherDataCollector(true, 5);
+        WeatherData thisDate;
+        while ( ! allWeatherDataInFile.isEmpty() ) {
+            thisDate = allWeatherDataInFile.remove();
+//            System.out.println(thisDate.toString());
+//            System.out.println(thisDate.getDate());
+//            System.out.println(startDate);
+            if ( ( startDate.compareTo(thisDate.getDate()) < 1 ) && 
+                    ( thisDate.getDate().compareTo(endDate) ) < 1 )
+            { maxTemps.push(thisDate); }
+        }
+        for ( WeatherData x : maxTemps.dumpValues()) {
+            weatherQueue.add(x);
         }
     }
 
-    static void GetMinFive(ConcurrentLinkedQueue weatherQueue, ConcurrentLinkedQueue fileNameQueue) {
-        return;
+    static void GetMinFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
+        // Create a collection for weather data for the specified file and
+        // enqueue that data
+
+        ConcurrentLinkedQueue<WeatherData> allWeatherDataInFile = new ConcurrentLinkedQueue();
+        FileParser(allWeatherDataInFile, fileName, "TMIN");
+        
+        // Go through allWeatherDataInFile and find the maximum five temperatures
+        MaxMinWeatherDataCollector maxTemps = new MaxMinWeatherDataCollector(false, 5);
+        WeatherData thisDate;
+        while ( ! allWeatherDataInFile.isEmpty() ) {
+            thisDate = allWeatherDataInFile.remove();
+            if ( ( startDate.compareTo(thisDate.getDate()) < 1 ) && 
+                    ( thisDate.getDate().compareTo(endDate) ) < 1 )
+            { maxTemps.push(thisDate); }
+        }
+        for ( WeatherData x : maxTemps.dumpValues()) {
+            weatherQueue.add(x);
+        }
     }
 }
