@@ -45,7 +45,12 @@ public class ICS440_P2 {
             }
         }
         
-        
+        // Get Max or Min temp preference here.
+        //
+        //
+        //
+        //
+        //
         
         // Create Queue of Files.
         String localFolderPath = "c:\\users\\dave_pierce\\Downloads\\ghcnd_hcn2";
@@ -71,7 +76,11 @@ public class ICS440_P2 {
             fileNameQueue.add(thisFile);
         }
 
-        
+        // Set up execution thread pool and create a callable for each fileName.
+        //
+        //
+        //
+        //
         
         while ( ! fileNameQueue.isEmpty() )
         {
@@ -79,17 +88,30 @@ public class ICS440_P2 {
             // WeatherFileParser.GetMinFive(weatherQueue, (File) fileNameQueue.remove(), startDate, endDate);
         }
         
+        // weatherQueue now contains Max/Min five results from each file.
+        // Filter using four threads with MaxMinWeatherDataCollectors
+        //
+        //
+        //
+        //
+        
+        // weatherQueue now contains up to 20 Max/Min results. Use a
+        // MaxMinWeatherData Collector to find the top five.
+        //
+        //
+        //
+        //
+        
+        
+        // Output
         while ( ! weatherQueue.isEmpty() )
         {
-            System.out.println(weatherQueue.remove().toString() );
+            WeatherData thisData = (WeatherData) weatherQueue.remove();
+            System.out.println(thisData.toString() );
+            // Find StationData with id matching thisData.id, and print out its toString().
+            // System.out.println();
+            
         }
-        
-        
-        
-//        while(! weatherQueue.isEmpty() )
-//        {
-//            System.out.println(weatherQueue.remove().toString());
-//        }
     }
 
 }
