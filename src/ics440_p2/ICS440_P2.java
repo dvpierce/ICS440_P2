@@ -52,6 +52,12 @@ public class ICS440_P2 {
         //
         //
         
+        // Get directory of files (path)
+        // Verify that there are *.dly files in it.
+        
+        // Get path to Stations file.
+        // parse it and complain if there are exceptions, then start again.
+        
         // Create Queue of Files.
         String localFolderPath = "c:\\users\\dave_pierce\\Downloads\\ghcnd_hcn2";
         String localStationFilePath = "c:\\users\\dave_pierce\\Downloads\\ghcnd-stations.txt";
