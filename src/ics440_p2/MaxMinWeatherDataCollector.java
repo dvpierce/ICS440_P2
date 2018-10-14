@@ -2,12 +2,14 @@ package ics440_p2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
  * @author dave_pierce
  */
-public class MaxMinWeatherDataCollector {
+public class MaxMinWeatherDataCollector implements Callable<Boolean>{
     // Holds the values.
     private WeatherData[] bucket;
     // Used to track number of values stored.
@@ -24,6 +26,37 @@ public class MaxMinWeatherDataCollector {
     // will collect and return the smallest values submitted.
     boolean maxOrMin;
     
+    // putDataHere - used for Callable; will stuff results into a ConcurrentLinkedQueue
+    ConcurrentLinkedQueue putDataHere;
+    ConcurrentLinkedQueue getDataHere;
+
+    public Boolean call() {
+        WeatherData testThis;
+        while ( ! this.getDataHere.isEmpty() ) {
+            testThis = (WeatherData) this.getDataHere.poll();
+            if ( testThis != null ) { this.push(testThis); }
+            else { break; }
+        }
+        
+        for (int i = 0; i < this.currentSize; i++ ) {
+            putDataHere.add(bucket[i]);
+        }
+        return true;
+    }
+    
+    MaxMinWeatherDataCollector(ConcurrentLinkedQueue getDataHere, ConcurrentLinkedQueue putDataHere, boolean maxOrMin) {
+        this.getDataHere = getDataHere;
+        this.putDataHere = putDataHere;
+        this.bucket = new WeatherData[5];
+        this.sizeThis = 5;
+        this.currentSize = 0;
+        this.maxOrMin = maxOrMin;
+        this.min = null;
+        this.max = null;
+        this.minIndex = 0;
+        this.maxIndex = 0;
+    }
+
     MaxMinWeatherDataCollector(boolean maxOrMin, int sizeThis) {
         this.bucket = new WeatherData[sizeThis];
         this.sizeThis = sizeThis;

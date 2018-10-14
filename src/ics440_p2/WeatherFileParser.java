@@ -9,11 +9,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +19,29 @@ import java.util.logging.Logger;
  *
  * @author dave_pierce
  */
-public class WeatherFileParser {
+public class WeatherFileParser implements Callable<Boolean> {
+    
+    private ConcurrentLinkedQueue weatherQueue;
+    private File fileName;
+    private Date startDate, endDate;
+    private Boolean SearchForTMax;
+    
+    public WeatherFileParser(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate, Boolean SearchForTMax) {
+        this.weatherQueue = weatherQueue;
+        this.fileName = fileName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.SearchForTMax = SearchForTMax;
+    }
+
+    public Boolean call() {
+        if (SearchForTMax) {
+            GetMaxFive(this.weatherQueue, this.fileName, this.startDate, this.endDate);
+        } else {
+            GetMinFive(this.weatherQueue, this.fileName, this.startDate, this.endDate);
+        }
+        return true;
+    }
     
     public static void FileParser(ConcurrentLinkedQueue WeatherDataQueue,
             File nextFile, String elementToFind)
@@ -101,7 +120,7 @@ public class WeatherFileParser {
         }
     }
 
-    static void GetMaxFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
+    private void GetMaxFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
         // Create a collection for weather data for the specified file and
         // enqueue that data
 
@@ -112,7 +131,7 @@ public class WeatherFileParser {
         MaxMinWeatherDataCollector maxTemps = new MaxMinWeatherDataCollector(true, 5);
         WeatherData thisDate;
         while ( ! allWeatherDataInFile.isEmpty() ) {
-            thisDate = allWeatherDataInFile.remove();
+            thisDate = allWeatherDataInFile.poll();
 //            System.out.println(thisDate.toString());
 //            System.out.println(thisDate.getDate());
 //            System.out.println(startDate);
@@ -125,7 +144,7 @@ public class WeatherFileParser {
         }
     }
 
-    static void GetMinFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
+    private void GetMinFive(ConcurrentLinkedQueue weatherQueue, File fileName, Date startDate, Date endDate) {
         // Create a collection for weather data for the specified file and
         // enqueue that data
 
@@ -136,7 +155,7 @@ public class WeatherFileParser {
         MaxMinWeatherDataCollector maxTemps = new MaxMinWeatherDataCollector(false, 5);
         WeatherData thisDate;
         while ( ! allWeatherDataInFile.isEmpty() ) {
-            thisDate = allWeatherDataInFile.remove();
+            thisDate = allWeatherDataInFile.poll();
             if ( ( startDate.compareTo(thisDate.getDate()) < 1 ) && 
                     ( thisDate.getDate().compareTo(endDate) ) < 1 )
             { maxTemps.push(thisDate); }
